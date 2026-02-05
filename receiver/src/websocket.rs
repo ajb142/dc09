@@ -7,6 +7,10 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::broadcast;
 use tokio_tungstenite::tungstenite::Message;
 
+/// Maximum number of messages to buffer in the broadcast channel.
+/// This controls backpressure - if clients can't keep up, older messages may be dropped.
+const BROADCAST_CHANNEL_CAPACITY: usize = 100;
+
 /// Represents an alarm message in JSON format for websocket transmission.
 #[derive(Debug, Clone, Serialize)]
 pub struct AlarmJson {
@@ -58,7 +62,7 @@ impl WebSocketServer {
     /// Creates a new websocket server listening on the specified address and port.
     pub async fn new(address: &str, port: u16) -> Result<Self> {
         let listener = TcpListener::bind(format!("{}:{}", address, port)).await?;
-        let (broadcast_tx, _) = broadcast::channel(100);
+        let (broadcast_tx, _) = broadcast::channel(BROADCAST_CHANNEL_CAPACITY);
         
         log::info!("WebSocket server listening on {}:{}", address, port);
         

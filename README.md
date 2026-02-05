@@ -80,15 +80,15 @@ The DC-09 Receiver Simulator is a command-line test server that handles DC-09 di
 
 The application uses the following arguments, configurable via the command line:
 
-| Argument           | Description                                             | Default Value | Example                             |
-|:-------------------|:--------------------------------------------------------|:--------------|:------------------------------------|
-| _\[ADDRESS\]_      | IP address to listen on                                 | 127.0.0.1     | 192.168.1.100                       |
-| `--port`, `-p`     | Port number to listen on                                | 8080          | --port 9000                         |
-| `--key`, `-k`      | Key to decrypt DC09 messages (16, 24, or 32 bytes long) | None          | --key "my16bytekey1234567890abcdef" |
-| `--nak`            | Send `NAK` instead of `ACK` for received messages       | false         | --nak                               |
-| `--scenarios`      | Configuration file specifying keys for the diallers     | None          | --scenarios examples/scenarios.json |
-| `--websocket`      | Enable WebSocket server for broadcasting alarms         | false         | --websocket                         |
-| `--websocket_port` | WebSocket server port (when --websocket is enabled)     | 8081          | --websocket_port 9001               |
+| Argument             | Description                                             | Default Value | Example                             |
+|:---------------------|:--------------------------------------------------------|:--------------|:------------------------------------|
+| _\[ADDRESS\]_        | IP address to listen on                                 | 127.0.0.1     | 192.168.1.100                       |
+| `--port`, `-p`       | Port number to listen on                                | 8080          | --port 9000                         |
+| `--key`, `-k`        | Key to decrypt DC09 messages (16, 24, or 32 bytes long) | None          | --key "my16bytekey1234567890abcdef" |
+| `--nak`              | Send `NAK` instead of `ACK` for received messages       | false         | --nak                               |
+| `--scenarios`        | Configuration file specifying keys for the diallers     | None          | --scenarios examples/scenarios.json |
+| `--websocket`        | Enable WebSocket server for broadcasting alarms         | false         | --websocket                         |
+| `--websocket-port`   | WebSocket server port (when --websocket is enabled)     | 8081          | --websocket-port 9001               |
 
 #### Example commands
 
@@ -101,7 +101,7 @@ Spin up a test server that tries to use encrypted communication with the `my16by
 Enable WebSocket server to broadcast alarms to connected clients:
 
 ```sh
-./receiver 192.168.1.100 --port 9000 --websocket --websocket_port 9001
+./receiver 192.168.1.100 --port 9000 --websocket --websocket-port 9001
 ```
 
 ### WebSocket Server
