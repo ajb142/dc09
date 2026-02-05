@@ -72,6 +72,7 @@ The DC-09 Receiver Simulator is a command-line test server that handles DC-09 di
 - Optional encryption with a user-provided key (16, 24, or 32 bytes).
 - Optional `NAK` response for received messages.
 - Assign distinct keys to different account names using scenario files.
+- Optional WebSocket server for broadcasting alarms to connected clients.
 
 ### Usage
 
@@ -79,13 +80,15 @@ The DC-09 Receiver Simulator is a command-line test server that handles DC-09 di
 
 The application uses the following arguments, configurable via the command line:
 
-| Argument       | Description                                             | Default Value | Example                             |
-|:---------------|:--------------------------------------------------------|:--------------|:------------------------------------|
-| _\[ADDRESS\]_  | IP address to listen on                                 | 127.0.0.1     | 192.168.1.100                       |
-| `--port`, `-p` | Port number to listen on                                | 8080          | --port 9000                         |
-| `--key`, `-k`  | Key to decrypt DC09 messages (16, 24, or 32 bytes long) | None          | --key "my16bytekey1234567890abcdef" |
-| `--nak`        | Send `NAK` instead of `ACK` for received messages       | false         | --nak                               |
-| `--scenarios`  | Configuration file specifying keys for the diallers     | None          | --scenarios examples/scenarios.json |
+| Argument             | Description                                             | Default Value | Example                             |
+|:---------------------|:--------------------------------------------------------|:--------------|:------------------------------------|
+| _\[ADDRESS\]_        | IP address to listen on                                 | 127.0.0.1     | 192.168.1.100                       |
+| `--port`, `-p`       | Port number to listen on                                | 8080          | --port 9000                         |
+| `--key`, `-k`        | Key to decrypt DC09 messages (16, 24, or 32 bytes long) | None          | --key "my16bytekey1234567890abcdef" |
+| `--nak`              | Send `NAK` instead of `ACK` for received messages       | false         | --nak                               |
+| `--scenarios`        | Configuration file specifying keys for the diallers     | None          | --scenarios examples/scenarios.json |
+| `--websocket`        | Enable WebSocket server for broadcasting alarms         | false         | --websocket                         |
+| `--websocket-port`   | WebSocket server port (when --websocket is enabled)     | 8081          | --websocket-port 9001               |
 
 #### Example commands
 
@@ -93,6 +96,70 @@ Spin up a test server that tries to use encrypted communication with the `my16by
 
 ```sh
 ./receiver 192.168.1.100 --port 9000 --key "my16bytekey1234567890abcdef" --nak
+```
+
+Enable WebSocket server to broadcast alarms to connected clients:
+
+```sh
+./receiver 192.168.1.100 --port 9000 --websocket --websocket-port 9001
+```
+
+### WebSocket Server
+
+When the `--websocket` flag is enabled, the receiver will start a WebSocket server that broadcasts all received alarms to connected clients in JSON format.
+
+#### WebSocket JSON Structure
+
+Each alarm received by the DC-09 receiver is converted to a JSON object and broadcast to all connected WebSocket clients. The JSON structure is as follows:
+
+```json
+{
+  "token": "SIA-DCS",
+  "sequence": 1,
+  "receiver": "R001",
+  "line_prefix": "L001",
+  "account": "1234",
+  "data": "NRI|AAlarm description",
+  "extended": ["Additional data 1", "Additional data 2"],
+  "timestamp": "12:34:56,01-15-2024"
+}
+```
+
+##### Field Descriptions
+
+| Field         | Type           | Description                                                       | Required |
+|:--------------|:---------------|:------------------------------------------------------------------|:---------|
+| `token`       | String         | ID token of the message (e.g., "NULL", "SIA-DCS", "ADM-CID")     | Yes      |
+| `sequence`    | Integer        | Message sequence number                                           | Yes      |
+| `receiver`    | String or null | Receiver identifier (e.g., "R001"), null if not specified         | No       |
+| `line_prefix` | String or null | Line prefix identifier (e.g., "L001"), null if not specified      | No       |
+| `account`     | String         | Account number                                                    | Yes      |
+| `data`        | String or null | Message data (e.g., "NRI\|AAlarm description"), null if not present | No       |
+| `extended`    | Array          | Array of extended data fields, empty array if none                | No       |
+| `timestamp`   | String or null | Timestamp in format "HH:MM:SS,MM-DD-YYYY", null if not present    | No       |
+
+##### Example Minimal JSON
+
+```json
+{
+  "token": "NULL",
+  "sequence": 0,
+  "account": "1234"
+}
+```
+
+##### Connecting to the WebSocket Server
+
+Clients can connect to the WebSocket server using any WebSocket client library. The default WebSocket URL is:
+
+```
+ws://127.0.0.1:8081
+```
+
+Or with custom settings:
+
+```
+ws://<address>:<websocket_port>
 ```
 
 ## Scenario files

@@ -3,6 +3,7 @@ use common::logging::DisplayMode;
 use common::scenarios::DiallerConfig;
 use common::utils::{SharedKeysMap, get_account_name};
 use std::collections::HashMap;
+use tokio::sync::broadcast;
 
 pub type DiallerKeys = HashMap<String, u16>;
 
@@ -12,6 +13,7 @@ pub struct ServerConfig {
     pub keys: SharedKeysMap,
     pub mode: DisplayMode,
     pub send_naks: bool,
+    pub ws_broadcaster: Option<broadcast::Sender<String>>,
 }
 
 impl ServerConfig {
@@ -33,6 +35,7 @@ impl ServerConfig {
             keys,
             mode: DisplayMode::Target,
             send_naks: false,
+            ws_broadcaster: None,
         }
     }
 
@@ -45,6 +48,12 @@ impl ServerConfig {
     /// Sets message display flag.
     pub fn with_msg_mode(mut self, mode: DisplayMode) -> Self {
         self.mode = mode;
+        self
+    }
+
+    /// Sets websocket broadcaster.
+    pub fn with_websocket(mut self, ws_broadcaster: Option<broadcast::Sender<String>>) -> Self {
+        self.ws_broadcaster = ws_broadcaster;
         self
     }
 
