@@ -31,6 +31,14 @@ pub struct Args {
     /// Configuration file specifying defined scenarios for the run.
     #[arg(long, value_parser = parse_scenarios_path)]
     pub scenarios: Option<Scenarios>,
+
+    /// Enable WebSocket server for broadcasting alarms to connected clients.
+    #[arg(long)]
+    pub websocket: bool,
+
+    /// WebSocket server port (only used when --websocket is enabled).
+    #[arg(long, default_value = "8081")]
+    pub websocket_port: u16,
 }
 
 impl Args {
